@@ -37,6 +37,8 @@ android {
             signingConfig = signingConfigs.debug
         }
     }
+
+    useLibrary("android.car")
 }
 
 flutter {

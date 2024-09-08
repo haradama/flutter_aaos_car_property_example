@@ -1,0 +1,51 @@
+@startuml
+
+actor User
+participant "MyApp" as MyApp
+participant "MyHomePage" as MyHomePage
+participant "CarService" as CarService
+participant "MethodChannel" as MethodChannel
+participant "MainActivity" as MainActivity
+participant "CarPropertyManager" as CarPropertyManager
+
+== Initialize ==
+
+User -> MyApp: runApp()
+MyApp -> MyHomePage: Create MyHomePage
+MyHomePage -> MyHomePage: initState()
+MyHomePage -> CarService: _initializeCarManager()
+CarService -> MethodChannel: invokeMethod("initializeCarManager")
+MethodChannel -> MainActivity: handle "initializeCarManager"
+MainActivity -> CarPropertyManager: initializeCarManager()
+CarPropertyManager --> MainActivity: Initialized
+
+MainActivity --> MethodChannel: "Car Manager Initialized"
+MethodChannel --> CarService: return "Car Manager Initialized"
+CarService --> MyHomePage: _initializeCarManager() complete
+
+== Call _getNightModeStatus() ==
+
+MyHomePage -> CarService: _getNightModeStatus()
+CarService -> MethodChannel: invokeMethod("getCarProperty", {propertyId, areaId})
+MethodChannel -> MainActivity: handle "getCarProperty"
+MainActivity -> CarPropertyManager: getCarProperty(propertyId, areaId)
+CarPropertyManager --> MainActivity: return nightModeValue
+MainActivity --> MethodChannel: return nightModeValue
+MethodChannel --> CarService: return nightModeValue
+CarService --> MyHomePage: return nightModeValue
+MyHomePage -> MyHomePage: Update UI (_isNightMode)
+
+== Call _setCabinLight(state) ==
+
+User -> MyHomePage: Select Cabin Light State
+MyHomePage -> CarService: _setCabinLight(state)
+CarService -> MethodChannel: invokeMethod("setCarProperty", {propertyId, areaId, cabinLightState})
+MethodChannel -> MainActivity: handle "setCarProperty"
+MainActivity -> CarPropertyManager: setCarProperty(propertyId, areaId, cabinLightState)
+CarPropertyManager --> MainActivity: Property set successfully
+MainActivity --> MethodChannel: return "Property set successfully"
+MethodChannel --> CarService: return "Property set successfully"
+CarService --> MyHomePage: return "Property set successfully"
+MyHomePage -> MyHomePage: Update UI (_cabinLightState)
+
+@enduml
